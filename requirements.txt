@@ -1,0 +1,11 @@
+#pip install -r requirements.txt
+Flask
+alembic
+flask_sqlalchemy
+PyJWT
+Joblib
+Numpy
+SQLAlchemy
+pandas
+requests
+beautifulsoup4
