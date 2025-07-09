@@ -9,3 +9,4 @@ SQLAlchemy
 pandas
 requests
 beautifulsoup4
+flasgger

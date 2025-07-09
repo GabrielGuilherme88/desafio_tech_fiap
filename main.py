@@ -3,6 +3,8 @@ import time
 
 from web_scraping import BookScraper, unificar_csvs
 
+from app import app, ALL_BOOKS_DATA, FULL_CSV_PATH
+
 
 def timer(start):
     """Calculate and print scraping process time."""
@@ -10,7 +12,7 @@ def timer(start):
     print(f"\n\nAll done! Books exported in {end_time // 60} mins {end_time % 60} secs.")
 
 
-def main():
+def main_scraping():
     """Init arg parser, and start scraper with config vars."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -41,5 +43,11 @@ caminho = "/home/gabrielguilherme/FIAP/desafio_tech_gg/exports/csv" #direciona a
 
 
 if __name__ == "__main__":
-    main()
-    unificar_csvs(caminho)
+    # main_scraping()
+    # unificar_csvs(caminho)
+    if ALL_BOOKS_DATA is None: #Executa as rotas do app.py
+        print("\nFATAL ERROR: Application cannot start without valid CSV data.")
+        print(f"Please check if '{FULL_CSV_PATH}' exists and is readable.")
+    else:
+        print(f"Loaded {len(ALL_BOOKS_DATA)} books from CSV. Starting Flask app...")
+        app.run(debug=True)
