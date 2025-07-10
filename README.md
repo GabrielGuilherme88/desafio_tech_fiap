@@ -7,7 +7,7 @@ Este projeto demonstra a construção de um pipeline completo de Machine Learnin
 
 ## 📊 1. Diagrama de Pipeline
 
-```mermaid
+```
 flowchart TD
     A[📥 Ingestão de Dados (Web Scraping)] --> B[🗂️ Armazenamento CSV]
     B --> C[🧹 Pré-processamento & Unificação (Pandas)]
@@ -16,7 +16,6 @@ flowchart TD
     C --> F[🤖 Modelo de ML (Treinamento/Predição)]
     F --> D
 ```
-flowchart TD
     
 ---
 
