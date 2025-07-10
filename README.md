@@ -1,5 +1,7 @@
 🧠 Projeto de Pipeline de Machine Learning com API Flask
+
 📊 1. Diagrama de Pipeline
+
 mermaid
 Copiar
 Editar
@@ -10,6 +12,7 @@ flowchart TD
     D --> E[🌐 Consumo por Frontend, Cientistas de Dados, Apps]
     C --> F[🤖 Modelo de ML (Treinamento/Predição)]
     F --> D
+    
 🧾 2. Descrição do Pipeline
 📥 Ingestão
 Web scraping coleta dados de livros e salva arquivos .csv em exports/csv/.
