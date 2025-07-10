@@ -1,62 +1,105 @@
-# 📚 BookScraper API - Projeto FIAP
+🧠 Projeto de Pipeline de Machine Learning com API Flask
+📊 1. Diagrama de Pipeline
+mermaid
+Copiar
+Editar
+flowchart TD
+    A[📥 Ingestão de Dados (Web Scraping)] --> B[🗂️ Armazenamento CSV]
+    B --> C[🧹 Pré-processamento & Unificação (Pandas)]
+    C --> D[🚀 API Flask]
+    D --> E[🌐 Consumo por Frontend, Cientistas de Dados, Apps]
+    C --> F[🤖 Modelo de ML (Treinamento/Predição)]
+    F --> D
+🧾 2. Descrição do Pipeline
+📥 Ingestão
+Web scraping coleta dados de livros e salva arquivos .csv em exports/csv/.
 
-Este projeto tem como objetivo aplicar técnicas de **Web Scraping** e **APIs RESTful com Flask**, com foco na extração e disponibilização de informações sobre livros em um site de e-commerce fictício.
+🔄 Processamento
+Script unifica e pré-processa os CSVs, gerando tabela_unificada.csv.
 
----
+Trata tipos, valores ausentes e faz encoding de variáveis categóricas.
 
-## 🚀 Objetivos do Projeto
+🚀 API
+A API Flask serve endpoints RESTful para:
 
-- Coletar dados de livros via Web Scraping (usando `requests`, `BeautifulSoup`, etc.)
-- Organizar os dados extraídos em arquivos `.csv` com características como:
-  - Título
-  - Preço com e sem imposto
-  - Categoria
-  - Disponibilidade
-  - Avaliação
-- Unificar os arquivos CSV automaticamente
-- Criar uma API com Flask que permita:
-  - 📥 Inserir, editar e deletar livros (CRUD)
-  - 📊 Consultar estatísticas gerais (ex: preço médio, categorias mais comuns)
-  - 🔍 Filtrar livros via query parameters (ex: por categoria ou faixa de preço)
+🔍 Consulta e busca
 
----
+📊 Estatísticas
 
-## 🧰 Tecnologias Utilizadas
+🔐 Autenticação (JWT)
 
-- Python 3.10+
-- Flask
-- BeautifulSoup
-- Pandas
-- SQLAlchemy
-- SQLite
-- Flasgger (Swagger UI para documentação da API)
-- VSCode + Postman (para testes)
+🤖 Predição com modelo ML
 
----
+🤖 Machine Learning
+Modelo RandomForest é treinado para prever o rating dos livros.
 
-## 🗂 Estrutura do Projeto
+Exposto via endpoint: /api/v1/ml/predictions.
 
-Exemplos de Endpoints
-GET /livros → Retorna todos os livros
+🌐 Consumo
+Cientistas de dados, aplicações web/mobile e dashboards podem consumir a API para análises, visualizações ou automações.
 
-GET /livros?categoria=Ficcao → Filtra por categoria
+🏗️ 3. Arquitetura para Escalabilidade
+🧩 Separação de responsabilidades
+Módulos independentes: scraping, processamento, API, ML.
 
-GET /estatisticas → Estatísticas dos preços e categorias
+Fácil de escalar e manter.
 
-POST /livros → Adiciona novo livro
+🗃️ Persistência
+CSVs como intermediários (com possibilidade de migração para PostgreSQL/MongoDB).
 
-PUT /livros/<id> → Edita um livro existente
+Modelos versionados em disco (pode migrar para S3, MLflow, etc).
 
-DELETE /livros/<id> → Remove um livro
+⚙️ API Stateless
+Flask pode ser servido por Gunicorn/UWSGI atrás de um Nginx.
 
-📌 Observações
-O projeto é 100% acadêmico, desenvolvido como desafio da FIAP.
+Escalável horizontalmente (Docker, Kubernetes).
 
-A fonte dos dados é um site de livros fictício usado para aprendizado de scraping.
+🧠 ML como Serviço
+Modelo ML pode ser exposto como microserviço (FastAPI, BentoML).
 
-Boas práticas de desenvolvimento de APIs estão sendo aplicadas ao longo do projeto.
+Permite re-treinamento/versionamento independente.
 
-👨‍💻 Autor
-Gabriel Guilherme
-FIAP - Engenharia de Dados
-LinkedIn (adicione o link real aqui)
+👨‍🔬 4. Cenário de Uso para Cientistas de Dados/ML
+📂 Acesso aos Dados
+Endpoints:
+
+/api/v1/ml/features
+
+/api/v1/ml/training-data
+
+Dados prontos para análise/modelagem local.
+
+📈 Predição Online
+/api/v1/ml/predictions: permite enviar novos dados e receber predições em tempo real.
+
+🔁 Atualização do Modelo
+Re-treinamento automático com atualização do CSV.
+
+Futuro: integração CI/CD para automação do deploy de modelos.
+
+🔌 5. Plano de Integração com Modelos de ML
+🎯 Treinamento
+Script data_model.py treina e salva o modelo.
+
+Pode ser agendado (cron, Airflow).
+
+🧠 Predição
+Modelo carregado na inicialização da API.
+
+Predições servidas via REST.
+
+📊 Monitoramento
+Métricas de performance expostas via endpoint.
+
+Logs de predição armazenados para análise de drift.
+
+🚀 6. Futuras Evoluções
+📦 Migrar dados para banco relacional (PostgreSQL) ou NoSQL (MongoDB)
+
+🛠️ Orquestrar scraping/processamento com Airflow
+
+🤖 Servir modelo com FastAPI, BentoML ou Seldon
+
+🔐 Adicionar autenticação OAuth2, rate limiting, cache com Redis
+
+☁️ Deploy em nuvem (AWS, Azure, GCP) com CI/CD
