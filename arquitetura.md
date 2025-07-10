@@ -96,10 +96,6 @@ Permitem acesso aos dados prontos para análise e modelagem local.
 - Modelo carregado na inicialização da API.  
 - Predições via requisições REST.
 
-### 📊 Monitoramento  
-- Exposição de métricas de performance por endpoint.  
-- Logs de predições armazenados para análise de *model drift*.
-
 ---
 
 ## 🚀 6. Futuras Evoluções
