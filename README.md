@@ -119,5 +119,3 @@ Permitem acesso aos dados prontos para análise e modelagem local.
 - JWT: [https://jwt.io/](https://jwt.io/)
 
 ---
-
-**Desenvolvido com 💻 por [Seu Nome]**
