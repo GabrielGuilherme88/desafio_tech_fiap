@@ -116,7 +116,6 @@ Permitem acesso aos dados prontos para análise e modelagem local.
 
 - Flask: [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)  
 - Scikit-learn: [https://scikit-learn.org/](https://scikit-learn.org/)  
-- Airflow: [https://airflow.apache.org/](https://airflow.apache.org/)  
 - JWT: [https://jwt.io/](https://jwt.io/)
 
 ---
