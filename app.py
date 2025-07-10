@@ -1,9 +1,15 @@
 import os
 import csv
 from flask import Flask, jsonify, request
-from flasgger import Swagger
+from flasgger import Swagger, swag_from
 
 app = Flask(__name__)
+app.config['SWAGGER'] = {
+    'title': 'Books Scraping - Desafio Tech API',
+    'uiversion': 3,
+    'doc_dir': './docs/' # Opcional: para organizar os arquivos .yml
+}
+
 swagger = Swagger(app)
 
 # Define o caminho base para a pasta de exports
@@ -18,7 +24,7 @@ def load_books_from_csv():
     """
     if not os.path.exists(FULL_CSV_PATH):
         print(f"ERROR: CSV file not found at {FULL_CSV_PATH}")
-        return None # Retorna None se o arquivo não for encontrado
+        return None
 
     books_data = []
     try:
@@ -44,15 +50,11 @@ def load_books_from_csv():
         print(f"ERROR: Error reading CSV file: {e}")
         return None
 
-# Carrega os dados do CSV uma única vez na inicialização da aplicação
-# Para evitar ler o arquivo a cada requisição
+# Carrega os dados do CSV uma única vez
 ALL_BOOKS_DATA = load_books_from_csv()
 
 if ALL_BOOKS_DATA is None:
-    print("FATAL: Failed to load books data at startup. Exiting or handling gracefully.")
-    # Você pode optar por sair aqui ou ter rotas que retornem 500
-    # se os dados não estiverem disponíveis.
-    # Ex: import sys; sys.exit(1)
+    print("FATAL: Failed to load books data at startup.")
 
 # Função auxiliar para aplicar paginação
 def apply_pagination(data_list):
@@ -62,52 +64,29 @@ def apply_pagination(data_list):
     offset = max(0, offset)
     return data_list[offset:offset + limit]
 
-# Schema de resposta para Swagger (ajustado para ser reutilizável)
-book_schema = {
-    "type": "object",
-    "properties": {
-        "product_page_url": {"type": "string"},
-        "universal_product_code": {"type": "string"},
-        "title": {"type": "string"},
-        "price_including_tax": {"type": "string"},
-        "price_excluding_tax": {"type": "string"},
-        "number_available": {"type": "string"},
-        "product_description": {"type": "string"},
-        "category": {"type": "string"},
-        "review_rating": {"type": "string"},
-        "image_url": {"type": "string"},
-        "arquivo_origem": {"type": "string"}
-    }
-}
-
 @app.route('/api/v1/books', methods=['GET'])
 def get_all_books():
     """
-    Retorna todos os dados de livros a partir do arquivo CSV com paginação.
+    Retorna uma lista paginada de todos os livros.
     ---
     parameters:
       - name: limit
         in: query
         type: integer
+        required: false
         default: 10
-        description: Número máximo de registros a serem retornados.
+        description: O número de livros a serem retornados por página.
       - name: offset
         in: query
         type: integer
+        required: false
         default: 0
-        description: Número de registros para pular no início.
+        description: O ponto de partida para a paginação.
     responses:
       200:
-        description: Lista de todos os livros paginados.
-        schema:
-          type: array
-          items:
-            $ref: '#/definitions/Book'
+        description: Uma lista de livros.
       500:
-        description: Erro ao carregar os dados dos livros.
-    definitions:
-      Book:
-        schema: *book_schema
+        description: Erro interno do servidor, dados dos livros não carregados.
     """
     if ALL_BOOKS_DATA is None:
         return jsonify({"error": "Book data not loaded. Check server logs."}), 500
@@ -118,38 +97,33 @@ def get_all_books():
 @app.route('/api/v1/books/category/<string:category_name>', methods=['GET'])
 def get_books_by_category(category_name):
     """
-    Retorna dados de livros filtrados por categoria com paginação.
+    Busca livros por uma categoria específica.
     ---
     parameters:
       - name: category_name
         in: path
         type: string
         required: true
-        description: Nome da categoria para filtrar (case-insensitive).
+        description: O nome da categoria a ser buscada.
       - name: limit
         in: query
         type: integer
+        required: false
         default: 10
-        description: Número máximo de registros a serem retornados.
+        description: O número de livros a serem retornados por página.
       - name: offset
         in: query
         type: integer
+        required: false
         default: 0
-        description: Número de registros para pular no início.
+        description: O ponto de partida para a paginação.
     responses:
       200:
-        description: Lista de livros filtrados por categoria paginados.
-        schema:
-          type: array
-          items:
-            $ref: '#/definitions/Book'
+        description: Uma lista de livros da categoria especificada.
       404:
-        description: Categoria não encontrada.
+        description: Nenhum livro encontrado para a categoria especificada.
       500:
-        description: Erro ao carregar os dados dos livros.
-    definitions:
-      Book:
-        schema: *book_schema
+        description: Erro interno, dados dos livros não carregados.
     """
     if ALL_BOOKS_DATA is None:
         return jsonify({"error": "Book data not loaded. Check server logs."}), 500
@@ -168,41 +142,41 @@ def get_books_by_category(category_name):
 @app.route('/api/v1/books/search', methods=['GET'])
 def search_books():
     """
-    Busca livros por título e/ou categoria com paginação.
+    Busca livros por título e/ou categoria.
+    Pelo menos um dos parâmetros (title ou category) deve ser fornecido.
     ---
     parameters:
       - name: title
         in: query
         type: string
-        description: Parte do título para filtrar (case-insensitive).
+        required: false
+        description: Parte do título do livro a ser buscado (case-insensitive).
       - name: category
         in: query
         type: string
-        description: Categoria para filtrar (case-insensitive).
+        required: false
+        description: Nome da categoria exata do livro (case-insensitive).
       - name: limit
         in: query
         type: integer
+        required: false
         default: 10
-        description: Número máximo de registros a serem retornados.
+        description: O número de livros a serem retornados por página.
       - name: offset
         in: query
         type: integer
+        required: false
         default: 0
-        description: Número de registros para pular no início.
+        description: O ponto de partida para a paginação.
     responses:
       200:
-        description: Lista de livros que correspondem aos critérios de busca.
-        schema:
-          type: array
-          items:
-            $ref: '#/definitions/Book'
+        description: Uma lista de livros que correspondem aos critérios de busca.
+      400:
+        description: Nenhum parâmetro de busca ('title' ou 'category') foi fornecido.
       404:
-        description: Nenhum livro encontrado com os critérios fornecidos.
+        description: Nenhum livro encontrado com os critérios especificados.
       500:
-        description: Erro ao carregar os dados dos livros.
-    definitions:
-      Book:
-        schema: *book_schema
+        description: Erro interno, dados dos livros não carregados.
     """
     if ALL_BOOKS_DATA is None:
         return jsonify({"error": "Book data not loaded. Check server logs."}), 500
@@ -210,27 +184,20 @@ def search_books():
     title_filter = request.args.get('title')
     category_filter = request.args.get('category')
 
-    # Se nenhum filtro for fornecido, retornar 400 Bad Request ou lista vazia/todos os livros.
-    # Aqui, optamos por retornar 400 se nenhum filtro for especificado.
     if not title_filter and not category_filter:
         return jsonify({"error": "At least 'title' or 'category' query parameter is required for search."}), 400
 
     filtered_books = []
-    for book in ALL_BOOKS_DATA:
-        match_title = True
-        match_category = True
+    # Usando uma cópia para não modificar a lista original
+    search_list = list(ALL_BOOKS_DATA)
 
-        if title_filter:
-            if title_filter.lower() not in book.get('title', '').lower():
-                match_title = False
-        
-        if category_filter:
-            if book.get('category', '').lower() != category_filter.lower():
-                match_category = False
-        
-        # Um livro corresponde se ambos os filtros (se fornecidos) corresponderem
-        if match_title and match_category:
-            filtered_books.append(book)
+    if title_filter:
+        search_list = [book for book in search_list if title_filter.lower() in book.get('title', '').lower()]
+    
+    if category_filter:
+        search_list = [book for book in search_list if book.get('category', '').lower() == category_filter.lower()]
+    
+    filtered_books = search_list
 
     if not filtered_books:
         return jsonify({"message": "No books found matching the specified criteria."}), 404
@@ -241,26 +208,21 @@ def search_books():
 @app.route('/api/v1/books/<string:universal_product_code>', methods=['GET'])
 def get_book_by_id(universal_product_code):
     """
-    Retorna detalhes completos de um livro específico pelo Universal Product Code (UPC).
+    Obtém os detalhes de um livro específico pelo seu UPC.
     ---
     parameters:
       - name: universal_product_code
         in: path
         type: string
         required: true
-        description: O Universal Product Code (UPC) do livro a ser buscado.
+        description: O Universal Product Code (UPC) único do livro.
     responses:
       200:
-        description: Detalhes do livro encontrado.
-        schema:
-          $ref: '#/definitions/Book'
+        description: Os detalhes do livro solicitado.
       404:
         description: Livro não encontrado com o UPC fornecido.
       500:
-        description: Erro ao carregar os dados dos livros.
-    definitions:
-      Book:
-        schema: *book_schema
+        description: Erro interno, dados dos livros não carregados.
     """
     if ALL_BOOKS_DATA is None:
         return jsonify({"error": "Book data not loaded. Check server logs."}), 500
@@ -274,66 +236,45 @@ def get_book_by_id(universal_product_code):
 @app.route('/api/v1/categories', methods=['GET'])
 def get_categories():
     """
-    Lista todas as categorias de livros disponíveis.
+    Retorna uma lista de todas as categorias de livros disponíveis.
     ---
     responses:
       200:
-        description: Lista de categorias únicas.
+        description: Uma lista ordenada de nomes de categorias.
         schema:
           type: array
           items:
             type: string
       500:
-        description: Erro ao carregar os dados dos livros.
+        description: Erro interno, dados dos livros não carregados.
     """
     if ALL_BOOKS_DATA is None:
         return jsonify({"error": "Book data not loaded. Check server logs."}), 500
     
-    categories = set()
-    for book in ALL_BOOKS_DATA:
-        category = book.get('category')
-        if category:
-            categories.add(category)
+    categories = set(book.get('category') for book in ALL_BOOKS_DATA if book.get('category'))
     
     return jsonify(sorted(list(categories)))
 
 @app.route('/api/v1/health', methods=['GET'])
 def health_check():
     """
-    Verifica o status da API e conectividade com os dados.
+    Verifica a saúde da API.
+    Indica se a API está funcionando e se os dados dos livros foram carregados.
     ---
     responses:
       200:
-        description: API está saudável e dados carregados.
-        schema:
-          type: object
-          properties:
-            status:
-              type: string
-            message:
-              type: string
-            total_books_loaded:
-              type: integer
+        description: A API está saudável e os dados foram carregados.
       500:
-        description: API não está saudável ou dados não carregados.
-        schema:
-          type: object
-          properties:
-            status:
-              type: string
-            message:
-              type: string
+        description: A API não está saudável, os dados não puderam ser carregados.
     """
     if ALL_BOOKS_DATA is not None:
         return jsonify({
             "status": "healthy",
-            "message": "API está saudavel mané!",
+            "message": "API está saudável!",
             "total_books_loaded": len(ALL_BOOKS_DATA)
         }), 200
     else:
         return jsonify({
             "status": "unhealthy",
-            "message": "API está muito legal não jovem!"
+            "message": "API não está saudável! Falha ao carregar os dados."
         }), 500
-
-
