@@ -12,10 +12,12 @@ app.config['SWAGGER'] = {
 
 swagger = Swagger(app)
 
-# Define o caminho base para a pasta de exports
-BASE_EXPORTS_PATH = '/home/gabrielguilherme/FIAP/desafio_tech_fiap/exports/csv'
-CSV_FILENAME = 'tabela_unificada.csv' # Nome do seu arquivo CSV
-FULL_CSV_PATH = os.path.join(BASE_EXPORTS_PATH, CSV_FILENAME)
+# 1. Pega o diretório onde o script (app.py) está sendo executado.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Constrói o caminho relativo para o seu arquivo CSV.
+CSV_FILENAME = 'tabela_unificada.csv'
+FULL_CSV_PATH = os.path.join(BASE_DIR, 'exports', 'csv', CSV_FILENAME)
 
 def load_books_from_csv():
     """

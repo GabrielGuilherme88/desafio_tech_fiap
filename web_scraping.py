@@ -248,24 +248,54 @@ class BookScraper:
         exit()
 
 
-#union dos arquivos csv
+import os
+import pandas as pd
+
 def unificar_csvs(caminho_pasta):
-    arquivos_csv = [f for f in os.listdir(caminho_pasta) if f.endswith('.csv')]
+    """
+    Lê todos os arquivos .csv de uma pasta, limpa os dados de preço,
+    adiciona uma coluna com o nome do arquivo de origem,
+    e salva uma tabela unificada na mesma pasta.
+    Se nenhum CSV for encontrado, cria um arquivo vazio tabela_unificada.csv.
+    """
+    arquivos_csv = [f for f in os.listdir(caminho_pasta) if f.endswith('.csv') and f != 'tabela_unificada.csv']
+    
+    caminho_saida = os.path.join(caminho_pasta, "tabela_unificada.csv")
+
+    if not arquivos_csv:
+        print("Nenhum arquivo CSV para unificar encontrado na pasta especificada.")
+        
+        # Cria DataFrame vazio e salva como CSV
+        pd.DataFrame().to_csv(caminho_saida, index=False)
+        print(f"📄 Arquivo vazio criado em: {caminho_saida}")
+        return
+
     dataframes = []
+    print(f"Arquivos encontrados para unificação: {arquivos_csv}")
 
     for arquivo in arquivos_csv:
         caminho_arquivo = os.path.join(caminho_pasta, arquivo)
-        df = pd.read_csv(caminho_arquivo)
+        try:
+            df = pd.read_csv(caminho_arquivo)
 
-        for col in ['price_including_tax', 'price_excluding_tax']:
-            if col in df.columns:
-                df[col] = df[col].astype(str).str.replace('£', '', regex=False).astype(float)
+            for col in ['price_including_tax', 'price_excluding_tax']:
+                if col in df.columns:
+                    df[col] = df[col].astype(str).str.replace('£', '', regex=False).astype(float)
 
-        df['arquivo_origem'] = arquivo
-        dataframes.append(df)
+            df['arquivo_origem'] = arquivo
+            dataframes.append(df)
+        except Exception as e:
+            print(f"Erro ao processar o arquivo {arquivo}: {e}")
+
+    if not dataframes:
+        print("Nenhum dataframe foi criado a partir dos arquivos CSV. Verifique o conteúdo dos arquivos.")
+        pd.DataFrame().to_csv(caminho_saida, index=False)
+        print(f"📄 Arquivo vazio criado em: {caminho_saida}")
+        return
 
     tabela_unificada = pd.concat(dataframes, ignore_index=True)
-    caminho_saida = os.path.join(caminho_pasta, "tabela_unificada.csv")
     tabela_unificada.to_csv(caminho_saida, index=False)
 
-    print(f"✅ Tabela unificada salva em: {caminho_saida}")
+    print(f"✅ Tabela unificada com {len(tabela_unificada)} linhas salva em: {caminho_saida}")
+    
+

@@ -1,10 +1,8 @@
 import argparse
 import time
-
+import os
 from web_scraping import BookScraper, unificar_csvs
-
 from app import app, ALL_BOOKS_DATA, FULL_CSV_PATH
-
 
 def timer(start):
     """Calculate and print scraping process time."""
@@ -38,13 +36,13 @@ def main_scraping():
 #Inicio da unificação dos csvs
 print("Dando inicio a unificação dos csvs da pasta export...")
 
-caminho = "/home/gabrielguilherme/FIAP/desafio_tech_gg/exports/csv" #direciona até a pasta onde foi salvo os csv
-
-
+# Define o diretório base do script.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+caminho_da_pasta_csv = os.path.join(BASE_DIR, 'exports', 'csv')
 
 if __name__ == "__main__":
-    # main_scraping()
-    # unificar_csvs(caminho)
+    main_scraping()
+    unificar_csvs(caminho_da_pasta_csv)
     if ALL_BOOKS_DATA is None: #Executa as rotas do app.py
         print("\nFATAL ERROR: Application cannot start without valid CSV data.")
         print(f"Please check if '{FULL_CSV_PATH}' exists and is readable.")
