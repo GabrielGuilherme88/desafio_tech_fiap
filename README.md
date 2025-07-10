@@ -1,121 +1,81 @@
+# Desafio Tech FIAP - Books Scraping & ML API
 
- 🧠 Projeto de Pipeline de Machine Learning com API Flask
-
-Este projeto demonstra a construção de um pipeline completo de Machine Learning, desde a coleta de dados com Web Scraping até o consumo de predições via API Flask.
+Este projeto realiza scraping de dados de livros, unificação e processamento dos dados, expõe uma API RESTful com autenticação JWT, e integra um modelo de Machine Learning para predição de ratings.
 
 ---
 
-## 📊 1. Diagrama de Pipeline
+## Tecnologias Utilizadas
 
+- **Python 3.8+**
+- **Flask** — Framework web para a API REST.
+- **Flasgger** — Documentação Swagger/OpenAPI automática.
+- **Flask-JWT-Extended** — Autenticação JWT.
+- **Pandas** — Manipulação e processamento de dados.
+- **Scikit-learn** — Treinamento e uso do modelo de Machine Learning (RandomForest).
+- **Joblib** — Serialização do modelo ML.
+- **NumPy** — Operações numéricas.
+- **argparse** — CLI para scraping.
+- **os, time** — Utilitários do sistema.
+- **csv** — Leitura e escrita de arquivos CSV.
+
+---
+
+## Estrutura do Projeto
+
+desafio_tech_fiap/ │ ├── app.py # API Flask principal ├── data_model.py # Pipeline de ML: processamento, treino e predição ├── web_scraping.py # Scraper de livros e utilitários de unificação ├── exports/ │ └── csv/ # CSVs exportados e unificados ├── models/ # Modelos ML serializados (.pkl) ├── requirements.txt # Dependências do projeto └── README.md
+
+--
+
+## Como Executar o Projeto
+
+### 1. Clone o repositório
+
+```bash
+git clone <url-do-repo>
+cd desafio_tech_fiap
 ```
-flowchart TD
-    A[📥 Ingestão de Dados (Web Scraping)] --> B[🗂️ Armazenamento CSV]
-    B --> C[🧹 Pré-processamento & Unificação (Pandas)]
-    C --> D[🚀 API Flask]
-    D --> E[🌐 Consumo por Frontend, Cientistas de Dados, Apps]
-    C --> F[🤖 Modelo de ML (Treinamento/Predição)]
-    F --> D
+
+2. Crie e ative um ambiente virtual
 ```
-    
----
+python3 -m venv venv
+source venv/bin/activate
+```
 
-## 🧾 2. Descrição do Pipeline
+3. Instale as dependências
+```
+pip install -r requirements.txt
+```
 
-### 📥 Ingestão  
-- Dados coletados via Web Scraping de um site de livros.  
-- Armazenamento em arquivos `.csv` no diretório `exports/csv/`.
+4. Execute o Web Scraping (opcional, se já houver CSV)
+```
+python main.py --csv --one-file
+```
 
-### 🔄 Processamento  
-- Unificação dos arquivos CSV e pré-processamento com Pandas.  
-- Geração do arquivo `tabela_unificada.csv`.  
-- Limpeza de dados, tratamento de tipos e codificação de variáveis categóricas.
+Isso irá baixar os dados dos livros e gerar os arquivos CSV em exports/csv/.
 
-### 🚀 API  
-A API Flask expõe os seguintes endpoints RESTful:
+5. Treine o modelo de Machine Learning (opcional)
+O modelo é treinado automaticamente ao rodar a API, caso não exista um modelo salvo em models/.
 
-- 🔍 **Consulta e busca**
-- 📊 **Estatísticas**
-- 🔐 **Autenticação (JWT)**
-- 🤖 **Predição com modelo ML**
+6. Inicie a API Flask
+```
+python main.py
+```
 
-### 🤖 Machine Learning  
-- Treinamento de um modelo **RandomForest** para prever o `rating` dos livros.  
-- Exposição do modelo via endpoint: `/api/v1/ml/predictions`.
+Principais Endpoints
+/api/v1/books — Lista de livros (paginação)
+/api/v1/books/category/<categoria>
+/api/v1/books/search
+/api/v1/books/<universal_product_code>
+/api/v1/categories
+/api/v1/stats/overview
+/api/v1/ml/features — Dados de features para ML
+/api/v1/ml/training-data — Dados de treino para ML
+/api/v1/ml/predictions — Predição de rating via modelo ML (POST)
+/api/v1/auth/login — Autenticação JWT
 
-### 🌐 Consumo  
-- Cientistas de dados, aplicações web/mobile e dashboards podem consumir a API para análises, visualizações ou automações.
 
----
-
-## 🏗️ 3. Arquitetura para Escalabilidade
-
-### 🧩 Separação de Responsabilidades  
-- Módulos independentes: scraping, processamento, API, ML.  
-- Fácil manutenção e escalabilidade.
-
-### 🗃️ Persistência  
-- Dados armazenados em CSVs, com possibilidade futura de migração para PostgreSQL ou MongoDB.  
-- Modelos versionados em disco (futuramente para S3, MLflow, etc).
-
-### ⚙️ API Stateless  
-- Flask pode ser servido por Gunicorn ou UWSGI atrás de um Nginx.  
-- Suporte a escalabilidade horizontal (Docker, Kubernetes).
-
-### 🧠 ML como Serviço  
-- Modelo ML exposto como microserviço (ex: FastAPI, BentoML).  
-- Possibilita re-treinamento e versionamento independentes.
-
----
-
-## 👨‍🔬 4. Cenário de Uso para Cientistas de Dados/ML
-
-### 📂 Acesso aos Dados  
-Endpoints:
-
-- `/api/v1/ml/features`
-- `/api/v1/ml/training-data`
-
-Permitem acesso aos dados prontos para análise e modelagem local.
-
-### 📈 Predição Online  
-- Endpoint `/api/v1/ml/predictions`: permite envio de dados e retorno da predição em tempo real.
-
-### 🔁 Atualização do Modelo  
-- Re-treinamento automático a partir dos CSVs.  
-- Futuro: CI/CD para automação do deploy de modelos.
-
----
-
-## 🔌 5. Plano de Integração com Modelos de ML
-
-### 🎯 Treinamento  
-- Script `data_model.py` realiza o treinamento e salva o modelo.  
-- Pode ser agendado com `cron`, `Airflow`, etc.
-
-### 🧠 Predição  
-- Modelo carregado na inicialização da API.  
-- Predições via requisições REST.
-
-### 📊 Monitoramento  
-- Exposição de métricas de performance por endpoint.  
-- Logs de predições armazenados para análise de *model drift*.
-
----
-
-## 🚀 6. Futuras Evoluções
-
-- 📦 Migrar dados para banco relacional (PostgreSQL) ou NoSQL (MongoDB)  
-- 🛠️ Orquestrar scraping e processamento com Apache Airflow  
-- 🤖 Servir modelo com FastAPI, BentoML ou Seldon  
-- 🔐 Adicionar autenticação OAuth2, rate limiting e cache com Redis  
-- ☁️ Deploy em nuvem (AWS, Azure, GCP) com integração CI/CD  
-
----
-
-## 📌 Referências
-
-- Flask: [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)  
-- Scikit-learn: [https://scikit-learn.org/](https://scikit-learn.org/)  
-- JWT: [https://jwt.io/](https://jwt.io/)
-
----
+Observações
+O arquivo unificado tabela_unificada.csv deve estar em exports/csv/.
+O modelo ML é salvo/carregado automaticamente de models/book_rating_random_forest_model.pkl.
+Para re-treinar o modelo, basta remover o arquivo .pkl e reiniciar a API.
+O scraping pode ser executado via CLI para atualizar os dados.
