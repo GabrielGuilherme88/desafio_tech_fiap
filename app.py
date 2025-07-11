@@ -77,6 +77,10 @@ def apply_pagination(data_list):
     offset = max(0, offset)
     return data_list[offset:offset + limit]
 
+@app.route('/')
+def home():
+    return "Hello, Flask!"
+
 @app.route('/api/v1/books', methods=['GET'])
 def get_all_books():
     """
