@@ -752,67 +752,67 @@ def get_ml_training_data():
       500:
         description: Dados não disponíveis. Problema ao carregar o arquivo CSV.
     """
-    if df.empty:
-        return jsonify({"error": "Dados não disponíveis. Verifique o arquivo CSV e o caminho."}), 500
+#     if df.empty:
+#         return jsonify({"error": "Dados não disponíveis. Verifique o arquivo CSV e o caminho."}), 500
 
-    features_and_target_df = df[['price_including_tax', 'number_available', 'category', 'review_rating']].copy()
-    features_and_target_df = pd.get_dummies(features_and_target_df, columns=['category'], drop_first=True)
-    return jsonify(features_and_target_df.to_dict(orient='records'))
+#     features_and_target_df = df[['price_including_tax', 'number_available', 'category', 'review_rating']].copy()
+#     features_and_target_df = pd.get_dummies(features_and_target_df, columns=['category'], drop_first=True)
+#     return jsonify(features_and_target_df.to_dict(orient='records'))
 
 
-# Carrega o modelo e colunas na inicialização da aplicação
-try:
-    ml_model = joblib.load("book_rating_random_forest_model.pkl")
-    features_columns_after_ohe = joblib.load("features_columns_after_ohe.pkl")
-except Exception as e:
-    ml_model = None
-    features_columns_after_ohe = []
-    print(f"Erro ao carregar o modelo ou colunas: {e}")
+# # Carrega o modelo e colunas na inicialização da aplicação
+# try:
+#     ml_model = joblib.load("book_rating_random_forest_model.pkl")
+#     features_columns_after_ohe = joblib.load("features_columns_after_ohe.pkl")
+# except Exception as e:
+#     ml_model = None
+#     features_columns_after_ohe = []
+#     print(f"Erro ao carregar o modelo ou colunas: {e}")
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
-@app.route('/api/v1/ml/predictions', methods=['POST'])
-def make_prediction():
-    if ml_model is None:
-        return jsonify({"error": "Modelo não carregado."}), 500
+# @app.route('/api/v1/ml/predictions', methods=['POST'])
+# def make_prediction():
+#     if ml_model is None:
+#         return jsonify({"error": "Modelo não carregado."}), 500
 
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Requisição vazia ou inválida."}), 400
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Requisição vazia ou inválida."}), 400
 
-    required_fields = ['price_including_tax', 'number_available', 'category']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"error": f"Campo '{field}' ausente."}), 400
+#     required_fields = ['price_including_tax', 'number_available', 'category']
+#     for field in required_fields:
+#         if field not in data:
+#             return jsonify({"error": f"Campo '{field}' ausente."}), 400
 
-    try:
-        price = float(data.get('price_including_tax'))
-        available = int(data.get('number_available'))
-        category = str(data.get('category'))
-    except ValueError as e:
-        return jsonify({"error": f"Erro nos tipos de dados: {e}"}), 400
+#     try:
+#         price = float(data.get('price_including_tax'))
+#         available = int(data.get('number_available'))
+#         category = str(data.get('category'))
+#     except ValueError as e:
+#         return jsonify({"error": f"Erro nos tipos de dados: {e}"}), 400
 
-    try:
-        input_df = pd.DataFrame([{
-            'price_including_tax': price,
-            'number_available': available,
-            'category': category
-        }])
+#     try:
+#         input_df = pd.DataFrame([{
+#             'price_including_tax': price,
+#             'number_available': available,
+#             'category': category
+#         }])
 
-        input_df_processed = pd.get_dummies(input_df, columns=['category'], drop_first=True)
+#         input_df_processed = pd.get_dummies(input_df, columns=['category'], drop_first=True)
 
-        final_input_features = pd.DataFrame(0, index=input_df_processed.index, columns=features_columns_after_ohe)
-        for col in input_df_processed.columns:
-            if col in final_input_features.columns:
-                final_input_features[col] = input_df_processed[col]
+#         final_input_features = pd.DataFrame(0, index=input_df_processed.index, columns=features_columns_after_ohe)
+#         for col in input_df_processed.columns:
+#             if col in final_input_features.columns:
+#                 final_input_features[col] = input_df_processed[col]
 
-        prediction = ml_model.predict(final_input_features)[0]
-        predicted_rating = max(1, min(5, round(prediction)))
+#         prediction = ml_model.predict(final_input_features)[0]
+#         predicted_rating = max(1, min(5, round(prediction)))
 
-        return jsonify({
-            "predicted_review_rating": predicted_rating,
-            "raw_prediction": round(prediction, 4)
-        })
+#         return jsonify({
+#             "predicted_review_rating": predicted_rating,
+#             "raw_prediction": round(prediction, 4)
+#         })
 
-    except Exception as e:
-        return jsonify({"error": f"Erro durante a predição: {e}"}), 500
+#     except Exception as e:
+#         return jsonify({"error": f"Erro durante a predição: {e}"}), 500
