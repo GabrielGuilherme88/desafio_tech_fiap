@@ -1,13 +1,13 @@
 #pip install -r requirements.txt
-Flask
+Flask==3.1.1
 # flask_sqlalchemy
-PyJWT
-Joblib
-Numpy
+PyJWT==2.10.1
+Joblib==1.5.1
+Numpy==2.3.1
 # SQLAlchemy
-pandas
-requests
-beautifulsoup4
-flasgger
-Flask-JWT-Extended
+pandas==2.3.1
+requests==2.32.4
+beautifulsoup4==4.13.4
+flasgger==0.9.7.1
+Flask-JWT-Extended==4.7.1
 # scikit-learn
