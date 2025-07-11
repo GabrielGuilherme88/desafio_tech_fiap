@@ -1,17 +1,11 @@
 {
   "builds": [
     {
-      "src": "main.py", // Or your main entry point, e.g., "main.py"
+      "src": "main.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "250mb", // Explicitly set, though it's the default limit
-        "helpers": {
-          "exclude": ["node_modules"], // Exclude common web dev junk
-          "include": ["."], // Include all project files
-          "optimizeImages": false // If you have images, disable optimization if not needed
-        },
         "python": {
-          "installCommand": "pip install --no-cache-dir --upgrade -r requirements.txt"
+          "installCommand": "pip install --no-cache-dir -r requirements.txt"
         }
       }
     }
