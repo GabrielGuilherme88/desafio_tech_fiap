@@ -759,85 +759,81 @@ def get_ml_training_data():
     return jsonify(features_and_target_df.to_dict(orient='records'))
 
 
-# #predict
-# from data_model import (
-#     df_books, 
-#     ml_model, 
-#     features_columns_after_ohe, 
-#     get_features_df_for_ml, 
-#     get_training_data_df_for_ml, 
-#     model_performance_metrics,
-#     predict_book_rating
-# )
+#predict
+from data_model import (
+    df_books, 
+    ml_model, 
+    features_columns_after_ohe, 
+)
 
-# @app.route('/api/v1/ml/predictions', methods=['POST']) # Renomeado para predictions conforme sua solicitação
-# def make_prediction():
-#     """
-#     Recebe dados de um novo livro e retorna a previsão do review_rating.
-#     ---
-#     Espera um JSON com:
+@app.route('/api/v1/ml/predictions', methods=['POST']) # Renomeado para predictions conforme sua solicitação
+def make_prediction():
+    """
+    Recebe dados de um novo livro e retorna a previsão do review_rating.
+    ---
+    Espera um JSON com:
     
-#         "price_including_tax": float,
-#         "number_available": int,
-#         "category": "string"
+        "price_including_tax": float,
+        "number_available": int,
+        "category": "string"
     
-#     """
-#     # Verifica se o modelo foi carregado/treinado com sucesso
-#     if ml_model is None:
-#         return jsonify({"error": "Modelo de Machine Learning não treinado ou falhou ao carregar."}), 500
+    """
+    # Verifica se o modelo foi carregado/treinado com sucesso
+    if ml_model is None:
+        return jsonify({"error": "Modelo de Machine Learning não treinado ou falhou ao carregar."}), 500
 
-#     data = request.get_json()
-#     if not data:
-#         return jsonify({"error": "Corpo da requisição vazio ou inválido. Espera JSON."}), 400
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Corpo da requisição vazio ou inválido. Espera JSON."}), 400
 
-#     # Validação dos campos obrigatórios
-#     required_fields = ['price_including_tax', 'number_available', 'category']
-#     for field in required_fields:
-#         if field not in data:
-#             return jsonify({"error": f"Campo '{field}' ausente na requisição."}), 400
+    # Validação dos campos obrigatórios
+    required_fields = ['price_including_tax', 'number_available', 'category']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Campo '{field}' ausente na requisição."}), 400
             
-#     # Validação de tipo de dados e tratamento de valores ausentes para input
-#     try:
-#         price = float(data.get('price_including_tax', 0))
-#         available = int(data.get('number_available', 0))
-#         category = str(data.get('category', 'Unknown')) # Use 'Unknown' como padrão para categoria ausente
-#     except ValueError as e:
-#         return jsonify({"error": f"Erro na conversão de tipo de dado: {str(e)}. Verifique 'price_including_tax' e 'number_available'."}), 400
+    # Validação de tipo de dados e tratamento de valores ausentes para input
+    try:
+        price = float(data.get('price_including_tax', 0))
+        available = int(data.get('number_available', 0))
+        category = str(data.get('category', 'Unknown')) # Use 'Unknown' como padrão para categoria ausente
+    except ValueError as e:
+        return jsonify({"error": f"Erro na conversão de tipo de dado: {str(e)}. Verifique 'price_including_tax' e 'number_available'."}), 400
 
 
-#     try:
-#         # Cria um DataFrame a partir dos dados de entrada
-#         input_df = pd.DataFrame([{
-#             'price_including_tax': price,
-#             'number_available': available,
-#             'category': category
-#         }])
+    try:
+        # Cria um DataFrame a partir dos dados de entrada
+        input_df = pd.DataFrame([{
+            'price_including_tax': price,
+            'number_available': available,
+            'category': category
+        }])
         
-#         # Aplica o mesmo One-Hot Encoding da categoria
-#         input_df_processed = pd.get_dummies(input_df, columns=['category'], drop_first=True)
+        # Aplica o mesmo One-Hot Encoding da categoria
+        input_df_processed = pd.get_dummies(input_df, columns=['category'], drop_first=True)
 
-#         # Alinha as colunas do input_df_processed com as colunas usadas no treinamento do modelo
-#         # Isso é CRÍTICO para a predição!
-#         final_input_features = pd.DataFrame(0, index=input_df_processed.index, columns=features_columns_after_ohe)
+        # Alinha as colunas do input_df_processed com as colunas usadas no treinamento do modelo
+        # Isso é CRÍTICO para a predição!
+        final_input_features = pd.DataFrame(0, index=input_df_processed.index, columns=features_columns_after_ohe)
         
-#         # Copia os valores que existem do input para a estrutura final
-#         for col in input_df_processed.columns:
-#             if col in final_input_features.columns:
-#                 final_input_features[col] = input_df_processed[col]
+        # Copia os valores que existem do input para a estrutura final
+        for col in input_df_processed.columns:
+            if col in final_input_features.columns:
+                final_input_features[col] = input_df_processed[col]
 
-#         # Realiza a predição
-#         prediction = ml_model.predict(final_input_features)[0]
+        # Realiza a predição
+        prediction = ml_model.predict(final_input_features)[0]
         
-#         # Arredonda a predição para o número inteiro mais próximo, já que ratings são inteiros
-#         predicted_rating = round(prediction)
-#         # Garante que o rating esteja dentro dos limites esperados (1 a 5)
-#         predicted_rating = max(1, min(5, predicted_rating))
+        # Arredonda a predição para o número inteiro mais próximo, já que ratings são inteiros
+        predicted_rating = round(prediction)
+        # Garante que o rating esteja dentro dos limites esperados (1 a 5)
+        predicted_rating = max(1, min(5, predicted_rating))
 
-#         return jsonify({
-#             "predicted_review_rating": predicted_rating,
-#             "raw_prediction": round(prediction, 4) # Opcional: mostrar a predição bruta
-#         })
+        return jsonify({
+            "predicted_review_rating": predicted_rating,
+            "raw_prediction": round(prediction, 4) # Opcional: mostrar a predição bruta
+        })
 
-#     except Exception as e:
-#         # Captura erros gerais durante o processo de predição
-#         return jsonify({"error": f"Erro interno durante a predição: {str(e)}"}), 500
+    except Exception as e:
+        # Captura erros gerais durante o processo de predição
+        return jsonify({"error": f"Erro interno durante a predição: {str(e)}"}), 500
