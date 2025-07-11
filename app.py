@@ -661,43 +661,43 @@ def get_ml_features():
     return jsonify(features_df.to_dict(orient='records'))
 
 
-# @app.route('/api/v1/ml/training-data', methods=['GET'])
-# def get_ml_training_data():
-#     """
-#     Retorna o dataset completo para treinamento de um modelo de Machine Learning, incluindo features e variável alvo.
-#     ---
-#     responses:
-#       200:
-#         description: Dataset contendo features e target (review_rating).
-#         schema:
-#           type: array
-#           items:
-#             type: object
-#             properties:
-#               price_including_tax:
-#                 type: number
-#                 format: float
-#                 description: Preço do livro com imposto.
-#               number_available:
-#                 type: integer
-#                 description: Quantidade disponível do livro.
-#               review_rating:
-#                 type: number
-#                 format: float
-#                 description: Avaliação do livro (target).
-#               # As categorias one-hot encoded também aparecem aqui
-#               category_<nome>:
-#                 type: integer
-#                 description: Valor binário da categoria one-hot encoded.
-#       500:
-#         description: Dados não disponíveis. Problema ao carregar o arquivo CSV.
-#     """
-#     if df.empty:
-#         return jsonify({"error": "Dados não disponíveis. Verifique o arquivo CSV e o caminho."}), 500
+@app.route('/api/v1/ml/training-data', methods=['GET'])
+def get_ml_training_data():
+    """
+    Retorna o dataset completo para treinamento de um modelo de Machine Learning, incluindo features e variável alvo.
+    ---
+    responses:
+      200:
+        description: Dataset contendo features e target (review_rating).
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              price_including_tax:
+                type: number
+                format: float
+                description: Preço do livro com imposto.
+              number_available:
+                type: integer
+                description: Quantidade disponível do livro.
+              review_rating:
+                type: number
+                format: float
+                description: Avaliação do livro (target).
+              # As categorias one-hot encoded também aparecem aqui
+              category_<nome>:
+                type: integer
+                description: Valor binário da categoria one-hot encoded.
+      500:
+        description: Dados não disponíveis. Problema ao carregar o arquivo CSV.
+    """
+    if df.empty:
+        return jsonify({"error": "Dados não disponíveis. Verifique o arquivo CSV e o caminho."}), 500
 
-#     features_and_target_df = df[['price_including_tax', 'number_available', 'category', 'review_rating']].copy()
-#     features_and_target_df = pd.get_dummies(features_and_target_df, columns=['category'], drop_first=True)
-#     return jsonify(features_and_target_df.to_dict(orient='records'))
+    features_and_target_df = df[['price_including_tax', 'number_available', 'category', 'review_rating']].copy()
+    features_and_target_df = pd.get_dummies(features_and_target_df, columns=['category'], drop_first=True)
+    return jsonify(features_and_target_df.to_dict(orient='records'))
 
 
 # #predict
