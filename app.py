@@ -708,7 +708,7 @@ from data_model import (
     get_features_df_for_ml, 
     get_training_data_df_for_ml, 
     model_performance_metrics,
-    predict_book_rating # <<<<<<< Importante: Importe a nova função de predição
+    predict_book_rating
 )
 
 @app.route('/api/v1/ml/predictions', methods=['POST']) # Renomeado para predictions conforme sua solicitação

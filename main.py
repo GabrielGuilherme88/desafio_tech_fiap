@@ -41,8 +41,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 caminho_da_pasta_csv = os.path.join(BASE_DIR, 'exports', 'csv')
 
 if __name__ == "__main__":
-    # main_scraping()
-    # unificar_csvs(caminho_da_pasta_csv)
+    main_scraping()
+    unificar_csvs(caminho_da_pasta_csv)
     if ALL_BOOKS_DATA is None: #Executa as rotas do app.py
         print("\nFATAL ERROR: Application cannot start without valid CSV data.")
         print(f"Please check if '{FULL_CSV_PATH}' exists and is readable.")

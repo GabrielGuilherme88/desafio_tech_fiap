@@ -248,8 +248,7 @@ class BookScraper:
         exit()
 
 
-import os
-import pandas as pd
+
 
 def unificar_csvs(caminho_pasta):
     """
