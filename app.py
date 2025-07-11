@@ -515,18 +515,49 @@ def get_books_by_price_range():
     return jsonify(books_in_range)
 
 
-# aqui inicia a parte com JWT
 
-# Criação dos tokens com roles
-@app.route("/api/v1/auth/login", methods=["POST"])
-def login():
+
+
+from flask import Flask, request, jsonify, render_template_string, redirect, url_for
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
+
+form_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Form</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="POST">
+        <label>Usuário:</label><br>
+        <input type="text" name="username" required><br><br>
+
+        <label>Senha:</label><br>
+        <input type="password" name="password" required><br><br>
+
+        <input type="submit" value="Entrar">
+    </form>
+    {% if tokens %}
+        <h3>Tokens gerados:</h3>
+        <pre>{{ tokens }}</pre>
+    {% elif erro %}
+        <p style="color:red;">{{ erro }}</p>
+    {% endif %}
+</body>
+</html>
+"""
+
+@app.route("/api/v1/auth/login", methods=["GET", "POST"])
+def login_form():
     """
     Login que retorna access token e refresh token.
+
     ---
     parameters:
       - in: body
         name: credentials
-        required: true
+        required: false
         schema:
           type: object
           properties:
@@ -536,6 +567,15 @@ def login():
             password:
               type: string
               example: "123"
+      - in: query
+        name: username
+        required: false
+        type: string
+      - in: query
+        name: password
+        required: false
+        type: string
+
     responses:
       200:
         description: Login bem-sucedido. Retorna access token e refresh token.
@@ -549,19 +589,42 @@ def login():
       401:
         description: Nome de usuário ou senha inválidos.
     """
-    username = request.json.get("username")
-    password = request.json.get("password")
+    tokens = None
+    erro = None
 
-    if username != "admin" or password != "123":
-        return jsonify({"msg": "Nome de usuário ou senha inválidos"}), 401
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-    additional_claims = {
-        "roles": ["admin", "user"] if username == "admin" else ["user"]
-    }
+        if username != "admin" or password != "123":
+            erro = "Credenciais inválidas"
+        else:
+            additional_claims = {"roles": ["admin", "user"]}
+            access_token = create_access_token(identity=username, additional_claims=additional_claims)
+            refresh_token = create_refresh_token(identity=username)
 
-    access_token = create_access_token(identity=username, additional_claims=additional_claims)
-    refresh_token = create_refresh_token(identity=username)
-    return jsonify(access_token=access_token, refresh_token=refresh_token)
+            # Cria a pasta se não existir
+            export_dir = os.path.join(os.getcwd(), "export", "tolken_refresh")
+            os.makedirs(export_dir, exist_ok=True)
+
+            csv_path = os.path.join(export_dir, "tokens.csv")
+
+            # Verifica se o arquivo já existe (para não duplicar cabeçalhos)
+            file_exists = os.path.exists(csv_path)
+
+            # Abre o arquivo em modo append ("a")
+            with open(csv_path, mode="a", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                if not file_exists:
+                    writer.writerow(["username", "access_token", "refresh_token"])
+                writer.writerow([username, access_token, refresh_token])
+
+            tokens = {
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }
+
+    return render_template_string(form_html, tokens=tokens, erro=erro)
 
 
 @app.route("/api/v1/auth/refresh", methods=["POST"])
@@ -713,7 +776,6 @@ def get_ml_training_data():
 
 # @app.route('/api/v1/ml/predictions', methods=['POST']) # Renomeado para predictions conforme sua solicitação
 # def make_prediction():
-    
 #     """
 #     Recebe dados de um novo livro e retorna a previsão do review_rating.
 #     ---
