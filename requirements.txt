@@ -10,4 +10,5 @@ requests==2.32.4
 beautifulsoup4==4.13.4
 flasgger==0.9.7.1
 Flask-JWT-Extended==4.7.1
-# scikit-learn
+tqdm==2.2.3
+scikit-learn==1.7.0
