@@ -296,5 +296,9 @@ def unificar_csvs(caminho_pasta):
     tabela_unificada.to_csv(caminho_saida, index=False)
 
     print(f"✅ Tabela unificada com {len(tabela_unificada)} linhas salva em: {caminho_saida}")
+
+if __name__ == "__main__":
+    main_scraping()
+    unificar_csvs(caminho_da_pasta_csv)
     
 
