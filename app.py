@@ -623,7 +623,6 @@ def login_form():
 
     return render_template_string(form_html, tokens=tokens, erro=erro)
 
-
 @app.route("/api/v1/auth/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
