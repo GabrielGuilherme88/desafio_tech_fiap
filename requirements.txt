@@ -1,13 +1,13 @@
 #pip install -r requirements.txt
 Flask
-flask_sqlalchemy
+# flask_sqlalchemy
 PyJWT
 Joblib
 Numpy
-SQLAlchemy
+# SQLAlchemy
 pandas
 requests
 beautifulsoup4
 flasgger
 Flask-JWT-Extended
-scikit-learn
+# scikit-learn
