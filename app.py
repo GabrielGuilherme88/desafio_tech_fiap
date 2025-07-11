@@ -603,21 +603,18 @@ def login_form():
             access_token = create_access_token(identity=username, additional_claims=additional_claims)
             refresh_token = create_refresh_token(identity=username)
 
-            # Cria a pasta se não existir
-            export_dir = os.path.join(os.getcwd(), "export", "tolken_refresh")
-            os.makedirs(export_dir, exist_ok=True)
-
-            csv_path = os.path.join(export_dir, "tokens.csv")
-
-            # Verifica se o arquivo já existe (para não duplicar cabeçalhos)
-            file_exists = os.path.exists(csv_path)
-
-            # Abre o arquivo em modo append ("a")
-            with open(csv_path, mode="a", newline="", encoding="utf-8") as file:
-                writer = csv.writer(file)
-                if not file_exists:
-                    writer.writerow(["username", "access_token", "refresh_token"])
-                writer.writerow([username, access_token, refresh_token])
+            try:
+                export_dir = os.path.join(os.getcwd(), "export", "tolken_refresh")
+                os.makedirs(export_dir, exist_ok=True)
+                csv_path = os.path.join(export_dir, "tokens.csv")
+                file_exists = os.path.exists(csv_path)
+                with open(csv_path, mode="a", newline="", encoding="utf-8") as file:
+                    writer = csv.writer(file)
+                    if not file_exists:
+                        writer.writerow(["username", "access_token", "refresh_token"])
+                    writer.writerow([username, access_token, refresh_token])
+            except Exception as e:
+                print(f"Erro ao salvar CSV: {e}")
 
             tokens = {
                 "access_token": access_token,
