@@ -721,6 +721,8 @@ def get_ml_features():
     return jsonify(features_df.to_dict(orient='records'))
 
 
+
+
 @app.route('/api/v1/ml/training-data', methods=['GET'])
 def get_ml_training_data():
     """
@@ -752,12 +754,12 @@ def get_ml_training_data():
       500:
         description: Dados não disponíveis. Problema ao carregar o arquivo CSV.
     """
-#     if df.empty:
-#         return jsonify({"error": "Dados não disponíveis. Verifique o arquivo CSV e o caminho."}), 500
+    if df.empty:
+        return jsonify({"error": "Dados não disponíveis. Verifique o arquivo CSV e o caminho."}), 500
 
-#     features_and_target_df = df[['price_including_tax', 'number_available', 'category', 'review_rating']].copy()
-#     features_and_target_df = pd.get_dummies(features_and_target_df, columns=['category'], drop_first=True)
-#     return jsonify(features_and_target_df.to_dict(orient='records'))
+    features_and_target_df = df[['price_including_tax', 'number_available', 'category', 'review_rating']].copy()
+    features_and_target_df = pd.get_dummies(features_and_target_df, columns=['category'], drop_first=True)
+    return jsonify(features_and_target_df.to_dict(orient='records'))
 
 
 # # Carrega o modelo e colunas na inicialização da aplicação
@@ -768,8 +770,6 @@ def get_ml_training_data():
 #     ml_model = None
 #     features_columns_after_ohe = []
 #     print(f"Erro ao carregar o modelo ou colunas: {e}")
-
-# app = Flask(__name__)
 
 # @app.route('/api/v1/ml/predictions', methods=['POST'])
 # def make_prediction():
@@ -786,16 +786,14 @@ def get_ml_training_data():
 #             return jsonify({"error": f"Campo '{field}' ausente."}), 400
 
 #     try:
-#         price = float(data.get('price_including_tax'))
-#         available = int(data.get('number_available'))
+#         review_rating = int(data.get('review_rating'))
 #         category = str(data.get('category'))
 #     except ValueError as e:
 #         return jsonify({"error": f"Erro nos tipos de dados: {e}"}), 400
 
 #     try:
 #         input_df = pd.DataFrame([{
-#             'price_including_tax': price,
-#             'number_available': available,
+#             'review_rating': review_rating,
 #             'category': category
 #         }])
 

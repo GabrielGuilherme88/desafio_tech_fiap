@@ -57,6 +57,13 @@ def load_data_and_train_model():
                 features_columns_after_ohe = temp_X.columns.tolist()
 
                 print("Dados carregados e pré-processados para ML (após carregamento do modelo).")
+                temp_X = df_books[['price_including_tax', 'number_available', 'category']].copy()
+                temp_X = pd.get_dummies(temp_X, columns=['category'], drop_first=True)
+                features_columns_after_ohe = temp_X.columns.tolist()
+
+                FEATURES_PATH = os.path.join(MODELS_DIR, 'features_columns_after_ohe.pkl')
+                joblib.dump(features_columns_after_ohe, FEATURES_PATH)
+                print(f"Colunas de features salvas como '{FEATURES_PATH}' (após carregamento do modelo)")
                 
             except FileNotFoundError:
                 print(f"Aviso: CSV '{caminho_completo_csv}' não encontrado, mas modelo foi carregado.")
@@ -81,16 +88,11 @@ def load_data_and_train_model():
         
         df_books[['price_including_tax', 'number_available', 'review_rating']] = \
             df_books[['price_including_tax', 'number_available', 'review_rating']].fillna(0)
-        df_books['category'].fillna('Unknown', inplace=True)
+        df_books['category'] = df_books['category'].fillna('Unknown')
 
         print("Dados carregados e pré-processados para ML (para novo treinamento).")
 
-        # Preparação de Dados para Treinamento
-        X = df_books[['price_including_tax', 'number_available', 'category']].copy()
-        y = df_books['review_rating'].copy()
 
-        X = pd.get_dummies(X, columns=['category'], drop_first=True)
-        features_columns_after_ohe = X.columns.tolist()
 
         # Divisão em Treino e Teste
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
