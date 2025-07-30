@@ -8,6 +8,7 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity, get_jwt
 )
 import joblib
+from monitorar import monitor_api_call  # <- Importa o decorador
 
 app = Flask(__name__)
 app.config['SWAGGER'] = {
@@ -83,6 +84,7 @@ def home():
     return "Hello, Flask!"
 
 @app.route('/api/v1/books', methods=['GET'])
+@monitor_api_call
 def get_all_books():
     """
     Retorna uma lista paginada de todos os livros.
@@ -113,6 +115,7 @@ def get_all_books():
     return jsonify(paginated_books)
 
 @app.route('/api/v1/books/category/<string:category_name>', methods=['GET'])
+@monitor_api_call
 def get_books_by_category(category_name):
     """
     Busca livros por uma categoria específica.
@@ -158,6 +161,7 @@ def get_books_by_category(category_name):
     return jsonify(paginated_books)
 
 @app.route('/api/v1/books/search', methods=['GET'])
+@monitor_api_call
 def search_books():
     """
     Retorna livros que correspondem parcial ou totalmente ao título e/ou à categoria informada
@@ -225,6 +229,7 @@ def search_books():
     return jsonify(paginated_books)
 
 @app.route('/api/v1/books/<string:universal_product_code>', methods=['GET'])
+@monitor_api_call
 def get_book_by_id(universal_product_code):
     """
     Buscar livro por Universal Product Code (UPC)
@@ -280,6 +285,7 @@ def get_book_by_id(universal_product_code):
     return jsonify({"message": "Book not found with the provided Universal Product Code."}), 404
 
 @app.route('/api/v1/categories', methods=['GET'])
+@monitor_api_call
 def get_categories():
     """
     Retorna uma lista de todas as categorias de livros disponíveis.
@@ -302,6 +308,7 @@ def get_categories():
     return jsonify(sorted(list(categories)))
 
 @app.route('/api/v1/health', methods=['GET'])
+@monitor_api_call
 def health_check():
     """
     Verifica a saúde da API.
@@ -347,6 +354,7 @@ except Exception as e:
     print(f"Erro ao carregar ou processar o CSV: {e}")
 
 @app.route('/api/v1/stats/overview', methods=['GET'])
+@monitor_api_call
 def get_stats_overview():
     """
     Retorna estatísticas gerais dos livros.
@@ -404,6 +412,7 @@ def get_stats_overview():
 
 
 @app.route('/api/v1/books/top-rated', methods=['GET'])
+@monitor_api_call
 def get_top_rated_books():
     """
     Retorna os 20 livros com melhor avaliação.
@@ -447,6 +456,7 @@ def get_top_rated_books():
     return jsonify(top_books_list)
 
 @app.route('/api/v1/books/price-range', methods=['GET'])
+@monitor_api_call
 def get_books_by_price_range():
     """
     Filtrar livros por faixa de preço
@@ -550,6 +560,7 @@ form_html = """
 """
 
 @app.route("/api/v1/auth/login", methods=["GET", "POST"])
+@monitor_api_call
 def login_form():
     """
     Login que retorna access token e refresh token.
@@ -625,6 +636,7 @@ def login_form():
     return render_template_string(form_html, tokens=tokens, erro=erro)
 
 @app.route("/api/v1/auth/refresh", methods=["POST"])
+@monitor_api_call
 @jwt_required(refresh=True)
 def refresh():
     """
@@ -650,6 +662,7 @@ def refresh():
 
 
 @app.route("/api/v1/scraping/trigger", methods=["POST"])
+@monitor_api_call
 @jwt_required()
 def trigger_scraping():
     """
@@ -687,6 +700,7 @@ def trigger_scraping():
 #inicio das rotas de ML 
 
 @app.route('/api/v1/ml/features', methods=['GET'])
+@monitor_api_call
 def get_ml_features():
     """
     Retorna os dados dos livros formatados como features para um modelo de Machine Learning.
@@ -724,6 +738,7 @@ def get_ml_features():
 
 
 @app.route('/api/v1/ml/training-data', methods=['GET'])
+@monitor_api_call
 def get_ml_training_data():
     """
     Retorna o dataset completo para treinamento de um modelo de Machine Learning, incluindo features e variável alvo.
@@ -762,55 +777,50 @@ def get_ml_training_data():
     return jsonify(features_and_target_df.to_dict(orient='records'))
 
 
-# # Carrega o modelo e colunas na inicialização da aplicação
-# try:
-#     ml_model = joblib.load("book_rating_random_forest_model.pkl")
-#     features_columns_after_ohe = joblib.load("features_columns_after_ohe.pkl")
-# except Exception as e:
-#     ml_model = None
-#     features_columns_after_ohe = []
-#     print(f"Erro ao carregar o modelo ou colunas: {e}")
 
-# @app.route('/api/v1/ml/predictions', methods=['POST'])
-# def make_prediction():
-#     if ml_model is None:
-#         return jsonify({"error": "Modelo não carregado."}), 500
+import os
+import pandas as pd
 
-#     data = request.get_json()
-#     if not data:
-#         return jsonify({"error": "Requisição vazia ou inválida."}), 400
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(BASE_DIR, 'exports', 'csv', 'tabela_unificada.csv')
 
-#     required_fields = ['price_including_tax', 'number_available', 'category']
-#     for field in required_fields:
-#         if field not in data:
-#             return jsonify({"error": f"Campo '{field}' ausente."}), 400
+df_books = pd.read_csv(csv_path)
 
-#     try:
-#         review_rating = int(data.get('review_rating'))
-#         category = str(data.get('category'))
-#     except ValueError as e:
-#         return jsonify({"error": f"Erro nos tipos de dados: {e}"}), 400
+# Converter review_rating para número (ex: "1 star(s)" -> 1)
+def convert_rating(r):
+    try:
+        return int(r.split()[0])
+    except Exception:
+        return 0
 
-#     try:
-#         input_df = pd.DataFrame([{
-#             'review_rating': review_rating,
-#             'category': category
-#         }])
+df_books['review_rating_num'] = df_books['review_rating'].apply(convert_rating)
 
-#         input_df_processed = pd.get_dummies(input_df, columns=['category'], drop_first=True)
+@app.route('/api/v1/ml/predictions', methods=['POST'])
+def ml_predictions():
+    data = request.get_json()
 
-#         final_input_features = pd.DataFrame(0, index=input_df_processed.index, columns=features_columns_after_ohe)
-#         for col in input_df_processed.columns:
-#             if col in final_input_features.columns:
-#                 final_input_features[col] = input_df_processed[col]
+    if not data or 'price_including_tax' not in data:
+        return jsonify({'error': 'Campo price_including_tax é obrigatório'}), 400
 
-#         prediction = ml_model.predict(final_input_features)[0]
-#         predicted_rating = max(1, min(5, round(prediction)))
+    price_limit = data['price_including_tax']
 
-#         return jsonify({
-#             "predicted_review_rating": predicted_rating,
-#             "raw_prediction": round(prediction, 4)
-#         })
+    # Filtra livros com preço <= price_limit
+    filtered_books = df_books[df_books['price_including_tax'] <= price_limit]
 
-#     except Exception as e:
-#         return jsonify({"error": f"Erro durante a predição: {e}"}), 500
+    # Ordena pela avaliação decrescente e pega top 3
+    top_books = filtered_books.sort_values(by='review_rating_num', ascending=False).head(3)
+
+    # Seleciona colunas que quer retornar
+    columns_to_return = ['title', 'price_including_tax', 'review_rating', 'category', 'number_available']
+    recommendations = top_books[columns_to_return].to_dict(orient='records')
+
+    return jsonify({'recommendations': recommendations}), 200
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+

@@ -1,0 +1,5 @@
+request_id,endpoint,method,client_ip,status_code,duration_ms
+5ed7174f-ad9e-44c5-9fe4-cf0a400d90ed,/api/v1/books,GET,127.0.0.1,200,0.38
+f34c53bd-813c-45c2-9818-453638fc5049,/api/v1/books,GET,127.0.0.1,200,0.29
+7045438a-62f7-407e-9eba-f15fb90c6abe,/api/v1/books/top-rated,GET,127.0.0.1,200,16.69
+d637cf35-465f-410c-ab62-8145f3d545f2,/api/v1/ml/training-data,GET,127.0.0.1,200,97.54
