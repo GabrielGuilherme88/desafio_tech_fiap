@@ -3,3 +3,11 @@ request_id,endpoint,method,client_ip,status_code,duration_ms
 f34c53bd-813c-45c2-9818-453638fc5049,/api/v1/books,GET,127.0.0.1,200,0.29
 7045438a-62f7-407e-9eba-f15fb90c6abe,/api/v1/books/top-rated,GET,127.0.0.1,200,16.69
 d637cf35-465f-410c-ab62-8145f3d545f2,/api/v1/ml/training-data,GET,127.0.0.1,200,97.54
+2678abc4-e327-46c7-a68a-5920997e0a81,/api/v1/ml/predictions,POST,127.0.0.1,500,13.23
+255783cc-3983-4f62-951f-5446b9a968cd,/api/v1/ml/predictions,POST,127.0.0.1,200,5.14
+7fca8a12-f468-408e-8f40-82c86a90bdef,/api/v1/ml/predictions,POST,127.0.0.1,500,1.55
+8bf79496-df5c-40fb-b335-1ec91946ce7b,/api/v1/auth/refresh,POST,127.0.0.1,500,6.28
+9c1e5981-7a95-4b97-a94e-75ec89d02fb1,/api/v1/ml/predictions,POST,127.0.0.1,500,10.9
+90f0bd5f-e482-4834-ba2a-a484d8de636a,/api/v1/ml/features,GET,127.0.0.1,200,99.65
+0777461b-c097-4683-9ef6-df8ed880e747,/api/v1/ml/predictions,POST,127.0.0.1,500,0.89
+aebc65d8-6b71-458d-9a7f-c77af424b3a0,/api/v1/ml/predictions,POST,127.0.0.1,200,5.59

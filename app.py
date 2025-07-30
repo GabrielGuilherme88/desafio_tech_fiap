@@ -778,48 +778,78 @@ def get_ml_training_data():
 
 
 
-import os
-import pandas as pd
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 csv_path = os.path.join(BASE_DIR, 'exports', 'csv', 'tabela_unificada.csv')
 
+# Carrega dataset
 df_books = pd.read_csv(csv_path)
 
-# Converter review_rating para número (ex: "1 star(s)" -> 1)
+# Converte review_rating para numérico
 def convert_rating(r):
     try:
         return int(r.split()[0])
-    except Exception:
+    except:
         return 0
 
 df_books['review_rating_num'] = df_books['review_rating'].apply(convert_rating)
 
 @app.route('/api/v1/ml/predictions', methods=['POST'])
+@monitor_api_call
 def ml_predictions():
+    """
+    Recebe um preço e retorna os 3 livros recomendados com preço menor ou igual, ordenados por avaliação.
+    ---
+    parameters: # Definição dos parâmetros da requisição
+      - name: price_including_tax
+        in: body # Indica que o parâmetro está no corpo da requisição
+        type: number
+        format: float
+        required: true
+        description: Preço do livro para filtro
+        schema:
+          type: object
+          properties:
+            price_including_tax:
+              type: number
+              format: float
+    responses:
+      200:
+        description: Top 3 livros recomendados
+        schema:
+          type: object
+          properties:
+            recommendations:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  price_including_tax:
+                    type: number
+                    format: float
+                  review_rating:
+                    type: string
+                  category:
+                    type: string
+                  number_available:
+                    type: integer
+      400:
+        description: Requisição inválida
+    """
     data = request.get_json()
-
     if not data or 'price_including_tax' not in data:
         return jsonify({'error': 'Campo price_including_tax é obrigatório'}), 400
 
     price_limit = data['price_including_tax']
 
-    # Filtra livros com preço <= price_limit
     filtered_books = df_books[df_books['price_including_tax'] <= price_limit]
-
-    # Ordena pela avaliação decrescente e pega top 3
     top_books = filtered_books.sort_values(by='review_rating_num', ascending=False).head(3)
 
-    # Seleciona colunas que quer retornar
     columns_to_return = ['title', 'price_including_tax', 'review_rating', 'category', 'number_available']
     recommendations = top_books[columns_to_return].to_dict(orient='records')
 
-    return jsonify({'recommendations': recommendations}), 200
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
+    return jsonify({'recommendations': recommendations})
 
 
 

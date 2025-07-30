@@ -1,0 +1,3 @@
+request_id,endpoint,method,client_ip,status_code,duration_ms
+9402b446-24a5-4d51-9202-3a69d9c948b7,/api/v1/books,GET,127.0.0.1,200,0.4
+d61d1ffd-77a9-4120-b54b-82ee0145c4c9,/api/v1/books,GET,127.0.0.1,200,0.3
