@@ -43,7 +43,7 @@ desafio_tech_fiap/
 ### 1. Clone o repositório
 
 ```bash
-git clone [<url-do-repo>](https://github.com/GabrielGuilherme88/desafio_tech_fiap)
+git clone https://github.com/GabrielGuilherme88/desafio_tech_fiap
 cd desafio_tech_fiap
 ```
 
