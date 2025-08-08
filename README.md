@@ -60,10 +60,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Execute o Web Scraping (opcional, se já houver CSV)
+### 4. Execute o Web Scraping e o arquivo main
 
 ```bash
-python main.py --csv --one-file
+python web_scraping.py --caso ainda não tenha os csv
+python main.py
 ```
 
 Isso irá baixar os dados dos livros e gerar os arquivos CSV em `exports/csv/`.
